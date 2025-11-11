@@ -3,6 +3,8 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion } = require("mongodb");
+const { ObjectId } = require("mongodb");
+
 
 
 
@@ -35,6 +37,7 @@ async function run() {
     //bills collections
     const db = client.db("utility_db");
     const billsCollections = db.collection("bills");
+    const recentData = db.collection("recent-data");
 
     app.get("/bills" , async(req, res)=>{
       try{
@@ -45,6 +48,24 @@ async function run() {
         res.status(500).send({error : Bad_Request});
       }
     })
+
+    app.get("/recent-data", async (req, res) => {
+      try {
+        const data = await recentData.find().toArray();         res.send(data);
+      } catch (error) {
+        res.status(500).send({ error: "Server error" });
+      }
+    });
+
+
+
+  app.get("/recent-data/:id" ,async(req, res)=>{
+    const id = req.params.id;
+    const query = {_id : new ObjectId(id)}
+    const result = await recentData.findOne(query);
+    res.send(result);
+  })
+
 
    
     await client.db("admin").command({ ping: 1 });
