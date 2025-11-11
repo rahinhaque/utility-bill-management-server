@@ -28,6 +28,7 @@ async function run() {
     const db = client.db("utility_db");
     const billsCollections = db.collection("bills");
     const recentData = db.collection("recent-data");
+    const paymentsCollection = db.collection("paymentsCollection");
 
 
     app.post("/bills", async (req, res) => {
@@ -84,6 +85,24 @@ async function run() {
       const result = await recentData.findOne(query);
       res.send(result);
     });
+
+    //postPAyment
+
+    app.post("/payments", async (req, res) => {
+      try {
+        const payment = req.body;
+        const result = await paymentsCollection.insertOne(payment);
+        if (result.insertedId) {
+          res.json({ success: true });
+        } else {
+          res.json({ success: false });
+        }
+      } catch (err) {
+        console.error("Error saving payment:", err);
+        res.status(500).json({ success: false });
+      }
+    });
+
 
     await client.db("admin").command({ ping: 1 });
     console.log(
