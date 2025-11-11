@@ -41,6 +41,24 @@ async function run() {
       }
     });
 
+    app.get("/bills/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const bill = await billsCollections.findOne(query);
+
+        if (!bill) {
+          return res.status(404).send({ message: "Bill not found" });
+        }
+
+        res.send(bill);
+      } catch (error) {
+        console.error("Error fetching bill:", error);
+        res.status(500).send({ message: "Server error fetching bill" });
+      }
+    });
+
+
 
     app.get("/bills", async (req, res) => {
       try {
