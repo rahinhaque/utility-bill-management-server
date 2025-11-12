@@ -30,7 +30,6 @@ async function run() {
     const recentData = db.collection("recent-data");
     const paymentsCollection = db.collection("paymentsCollection");
 
-
     app.post("/bills", async (req, res) => {
       try {
         const newBill = req.body;
@@ -59,8 +58,6 @@ async function run() {
       }
     });
 
-
-
     app.get("/bills", async (req, res) => {
       try {
         const bills = await billsCollections.find().toArray();
@@ -86,23 +83,71 @@ async function run() {
       res.send(result);
     });
 
-    //postPAyment
-
+    
     app.post("/payments", async (req, res) => {
       try {
         const payment = req.body;
-        const result = await paymentsCollection.insertOne(payment);
-        if (result.insertedId) {
-          res.json({ success: true });
-        } else {
-          res.json({ success: false });
+        if (!payment.userEmail) {
+          return res
+            .status(400)
+            .json({ success: false, message: "Email required" });
         }
+        const result = await paymentsCollection.insertOne(payment);
+        res.json({ success: !!result.insertedId });
       } catch (err) {
         console.error("Error saving payment:", err);
         res.status(500).json({ success: false });
       }
     });
 
+   
+    app.get("/payments", async (req, res) => {
+      try {
+        const email = req.query.email;
+        if (!email)
+          return res.status(400).json({ message: "Email is required" });
+
+        const payments = await paymentsCollection
+          .find({ userEmail: email })
+          .toArray();
+        res.json(payments);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to load payments" });
+      }
+    });
+
+    // UPDATE
+    app.put("/payments/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const updatedBill = req.body;
+
+        const result = await paymentsCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: updatedBill }
+        );
+
+        res.json({ success: result.modifiedCount > 0 });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false });
+      }
+    });
+
+    // DELETE payment by ID
+    app.delete("/payments/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const result = await paymentsCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+        res.json({ success: result.deletedCount > 0 });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false });
+      }
+    });
 
     await client.db("admin").command({ ping: 1 });
     console.log(
