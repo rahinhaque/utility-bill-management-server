@@ -1,16 +1,18 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+require("dotenv").config()
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const { ObjectId } = require("mongodb");
+
+// console.log(process.env);
 
 //middleware
 app.use(cors());
 app.use(express.json());
 
-const uri =
-  "mongodb+srv://utility-bills-server:4JKLEoU7WdwkXQUB@simple-crud-sever.mcwoj3p.mongodb.net/?appName=simple-crud-sever";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@simple-crud-sever.mcwoj3p.mongodb.net/?appName=simple-crud-sever`;
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -41,6 +43,30 @@ async function run() {
       }
     });
 
+    app.get("/bills", async (req, res) => {
+      try {
+        const category = req.query.category;  
+        let query = {};
+
+        
+        if (category && category !== "All") {
+          query.category = category;
+        }
+
+         
+        const bills = await billsCollections.find(query).toArray();
+
+       
+        console.log("Bills fetched:", category || "All categories");
+
+        res.status(200).json(bills);
+      } catch (error) {
+        console.error("Error fetching bills:", error);
+        res.status(500).json({ message: "Failed to fetch bills" });
+      }
+    });
+
+
     app.get("/bills/:id", async (req, res) => {
       try {
         const id = req.params.id;
@@ -58,14 +84,7 @@ async function run() {
       }
     });
 
-    app.get("/bills", async (req, res) => {
-      try {
-        const bills = await billsCollections.find().toArray();
-        res.send(bills);
-      } catch {
-        res.status(500).send({ error: Bad_Request });
-      }
-    });
+    
 
     app.get("/recent-data", async (req, res) => {
       try {
