@@ -1,21 +1,30 @@
 {
   "name": "utility-bill-management-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend for Utility Bill Management App",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
-    "start": "Node index.js",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "vercel-build": "echo 'No build step needed for backend'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "utility-bill",
+    "backend",
+    "node",
+    "express"
+  ],
+  "author": "Your Name",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "mongodb": "^7.0.0",
+    "mongodb": "^7.0.0"
+  },
+  "devDependencies": {
     "nodemon": "^3.1.10"
   }
 }
